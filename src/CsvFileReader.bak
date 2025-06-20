@@ -1,0 +1,34 @@
+import fs from 'fs';
+import { dateStringToDate } from './utils';
+import { MatchResult } from './MatchResults';
+
+//tuple
+type MatchData = [Date, string, string, number, number, MatchResult, string];
+export class CsvFileReader {
+  data: MatchData[] = [];
+  //automatically sets it
+  constructor(public fileName: string) {}
+  read(): void {
+    this.data = fs
+      .readFileSync(this.fileName, {
+        encoding: 'utf-8',
+      })
+      .split('\n')
+      .map((row: string): string[] => {
+        return row.split(',');
+      })
+      .map((row: string[]): MatchData => {
+        //tuple in TS in the most appropriate use
+        // because if we use union we'd have to use type gaurd
+        return [
+          dateStringToDate(row[0]),
+          row[1],
+          row[2],
+          parseInt(row[3]),
+          parseInt(row[4]),
+          row[5] as MatchResult, //type assertion (it's a string but we're telling ts it's a MatchResult)
+          row[6],
+        ];
+      });
+  }
+}
